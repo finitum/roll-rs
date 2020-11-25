@@ -14,7 +14,7 @@ pub struct Parser<'a> {
 impl<'a> Parser<'a> {
     pub fn new(expr: &'a str) -> Self {
         Self {
-            source: expr.clone().to_string(),
+            source: expr.to_string(),
             expr: expr.chars().peekable(),
             pos: 0,
         }
@@ -55,16 +55,12 @@ impl<'a> Parser<'a> {
     }
 
     pub fn expect(&mut self, c: char, options: Options) -> Result<(), Options> {
-        loop {
-            if let Some(i) = self.expr.peek() {
-                if !i.is_whitespace() {
-                    break;
-                } else {
-                    self.pos += 1;
-                    self.expr.next();
-                }
-            } else {
+        while let Some(i) = self.expr.peek() {
+            if !i.is_whitespace() {
                 break;
+            } else {
+                self.pos += 1;
+                self.expr.next();
             }
         }
 
@@ -78,7 +74,7 @@ impl<'a> Parser<'a> {
 
     pub fn accept_any(
         &mut self,
-        c: &Vec<char>,
+        c: &[char],
         mut options: Options,
         name: Option<Options>,
     ) -> Result<char, Options> {
@@ -104,7 +100,9 @@ impl<'a> Parser<'a> {
         let result = self.parse_expr(Options::new(self.source.clone()))?;
 
         if self.expr.next().is_some() {
-            return Err(Options::new(self.source.clone()).pos(self.pos).message("unexpected trailing character(s)"))
+            return Err(Options::new(self.source.clone())
+                .pos(self.pos)
+                .message("unexpected trailing character(s)"));
         }
 
         Ok(result)
@@ -119,12 +117,7 @@ impl<'a> Parser<'a> {
 
         let mut res = left;
 
-        loop {
-            let op = if let Ok(i) = self.accept_any(&vec!['+', '-'], options.clone(), None) {
-                i
-            } else {
-                break;
-            };
+        while let Ok(op) = self.accept_any(&['+', '-'], options.clone(), None) {
             let right = self.parse_term(options.clone())?;
 
             res = match op {
@@ -141,14 +134,7 @@ impl<'a> Parser<'a> {
         let left = self.parse_factor(options.clone())?;
         let mut res = left;
 
-        loop {
-            let mut op = if let Ok(i) = self.accept_any(&vec!['*', '/', '%'], options.clone(), None)
-            {
-                i
-            } else {
-                break;
-            };
-
+        while let Ok(mut op) = self.accept_any(&['*', '/', '%'], options.clone(), None) {
             if self.accept('/', options.clone()).is_ok() {
                 op = 'i';
             }
@@ -172,7 +158,7 @@ impl<'a> Parser<'a> {
         let backup = self.backup();
 
         Ok(match self.accept('-', options.clone()) {
-            Ok(_) => Ast::Minus(Box::new(self.parse_atom(options.clone())?)),
+            Ok(_) => Ast::Minus(Box::new(self.parse_atom(options)?)),
             Err(o) => {
                 self.restore(backup);
 
@@ -185,7 +171,7 @@ impl<'a> Parser<'a> {
         let backup = self.backup();
         if self.accept('(', options.clone()).is_ok() {
             let sm = self.parse_sum(options.clone())?;
-            self.accept(')', options.clone())
+            self.accept(')', options)
                 .map_err(|e| e.message("missing closing parenthesis"))?;
 
             return Ok(sm);
@@ -197,7 +183,7 @@ impl<'a> Parser<'a> {
         }
 
         let backup = self.backup();
-        Ok(match self.parse_dice(options.clone()) {
+        Ok(match self.parse_dice(options) {
             Err(o) => {
                 self.restore(backup);
                 self.parse_number(o.message("tried to parse dice roll"))?
@@ -222,24 +208,24 @@ impl<'a> Parser<'a> {
         {
             FilterModifier::KeepHighest(Box::new(
                 self.parse_number(options)
-                    .unwrap_or(Ast::Const("1".to_string())),
+                    .unwrap_or_else(|_| Ast::Const("1".to_string())),
             ))
         } else if self.accept_string("dl", options.clone()).is_ok()
             || self.accept('l', options.clone()).is_ok()
         {
             FilterModifier::DropLowest(Box::new(
                 self.parse_number(options)
-                    .unwrap_or(Ast::Const("1".to_string())),
+                    .unwrap_or_else(|_| Ast::Const("1".to_string())),
             ))
         } else if self.accept_string("dh", options.clone()).is_ok() {
             FilterModifier::DropHighest(Box::new(
                 self.parse_number(options)
-                    .unwrap_or(Ast::Const("1".to_string())),
+                    .unwrap_or_else(|_| Ast::Const("1".to_string())),
             ))
         } else if self.accept_string("kl", options.clone()).is_ok() {
             FilterModifier::KeepLowest(Box::new(
                 self.parse_number(options)
-                    .unwrap_or(Ast::Const("1".to_string())),
+                    .unwrap_or_else(|_| Ast::Const("1".to_string())),
             ))
         } else {
             FilterModifier::None
@@ -286,7 +272,7 @@ impl<'a> Parser<'a> {
 
         let string: String = number.iter().collect();
 
-        return Ok(Ast::Const(string));
+        Ok(Ast::Const(string))
     }
 }
 
@@ -436,10 +422,7 @@ mod tests {
         let roll1 = &rolls[0].1.vals[1];
         let roll2 = &rolls[0].1.vals[2];
 
-        assert_eq!(
-            res,
-            Value::Int((roll0 + roll1 + roll2) as i64)
-        );
+        assert_eq!(res, Value::Int((roll0 + roll1 + roll2) as i64));
     }
 
     #[test]

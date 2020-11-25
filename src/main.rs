@@ -4,12 +4,12 @@ mod options;
 mod parser;
 mod roll;
 
-use crate::parser::Parser;
-use std::{env, process};
-use rand_core::OsRng;
-use crate::roll::roll_die;
 use crate::filtermodifier::FilterModifier;
+use crate::parser::Parser;
+use crate::roll::roll_die;
+use rand_core::OsRng;
 use std::num::NonZeroU64;
+use std::{env, process};
 
 fn main() {
     let argv: Vec<String> = env::args().skip(1).into_iter().collect();
@@ -38,7 +38,11 @@ const STAT_ROLL: &str = "4d6l";
 fn roll_stats() {
     fn roll_stat() -> roll::Roll {
         let mut rolls = Vec::new();
-        Parser::new(STAT_ROLL).parse().unwrap().interp(&mut rolls).unwrap();
+        Parser::new(STAT_ROLL)
+            .parse()
+            .unwrap()
+            .interp(&mut rolls)
+            .unwrap();
         rolls.remove(0).1
     }
 
@@ -48,17 +52,32 @@ fn roll_stats() {
     }
 }
 
-const DIR: &[&str] = &["North","North East","East","South East","South","South West","West","North West","Stay"];
+const DIR: &[&str] = &[
+    "North",
+    "North East",
+    "East",
+    "South East",
+    "South",
+    "South West",
+    "West",
+    "North West",
+    "Stay",
+];
 
 fn roll_dir() {
-    let value = roll_die(1, NonZeroU64::new(DIR.len() as u64).unwrap(), FilterModifier::None, OsRng);
+    let value = roll_die(
+        1,
+        NonZeroU64::new(DIR.len() as u64).unwrap(),
+        FilterModifier::None,
+        OsRng,
+    );
     println!("{}", DIR[value.total as usize - 1])
 }
 
 fn dice_roller(s: &str) {
     let mut p = Parser::new(s);
 
-    let ast = match p.parse()  {
+    let ast = match p.parse() {
         Ok(i) => i,
         Err(e) => {
             eprintln!("{}", e);
