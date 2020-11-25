@@ -55,7 +55,7 @@ impl fmt::Display for Options {
         writeln!(f, "{}", self.source)?;
         writeln!(f, "{}^", " ".repeat(self.lastpos as usize))?;
 
-        if self.options.len() > 0 {
+        if !self.options.is_empty() {
             writeln!(f, "An error occurred: unexpected character.")?;
             write!(f, "Expected any of: [")?;
             for (index, i) in self.options.iter().enumerate() {
@@ -73,6 +73,6 @@ impl fmt::Display for Options {
             writeln!(f, "{}", i)?;
         }
 
-        return Ok(());
+        Ok(())
     }
 }

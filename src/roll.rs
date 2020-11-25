@@ -21,7 +21,7 @@ pub fn roll_die(
         rolls.push(roll);
     }
 
-    rolls.sort();
+    rolls.sort_unstable();
 
     match fm {
         FilterModifier::KeepLowest(i) => {
