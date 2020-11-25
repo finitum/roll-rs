@@ -12,16 +12,17 @@ use crate::filtermodifier::FilterModifier;
 use std::num::NonZeroU64;
 
 fn main() {
-    let arg: String = env::args().skip(1).collect();
+    let argv: Vec<String> = env::args().skip(1).into_iter().collect();
+    let args = argv.join(" ");
 
-    match arg.as_str() {
+    match args.as_str() {
         "stats" => roll_stats(),
         "dir" => roll_dir(),
         "-h" | "--help" | "" => {
             print_usage(0);
         }
         _ => {
-            dice_roller(&arg);
+            dice_roller(&args);
         }
     }
 }
