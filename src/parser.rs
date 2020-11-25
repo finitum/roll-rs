@@ -432,13 +432,13 @@ mod tests {
 
         assert_eq!(rolls.len(), 1);
 
-        let roll0 = &rolls[0].1;
-        let roll1 = &rolls[0].1;
-        let roll2 = &rolls[0].1;
+        let roll0 = &rolls[0].1.vals[0];
+        let roll1 = &rolls[0].1.vals[1];
+        let roll2 = &rolls[0].1.vals[2];
 
         assert_eq!(
             res,
-            Value::Int((roll0.total + roll1.total + roll2.total) as i64)
+            Value::Int((roll0 + roll1 + roll2) as i64)
         );
     }
 
@@ -459,7 +459,7 @@ mod tests {
         let mut rolls = Vec::new();
         let res = ast.interp(&mut rolls).unwrap();
 
-        assert_eq!(rolls.len(), 0);
+        assert_eq!(rolls.len(), 1);
 
         assert_eq!(res, Value::Int(0));
     }
@@ -536,7 +536,7 @@ mod tests {
 
         let roll = &rolls[0].1;
 
-        assert_eq!(roll.vals.len(), 100);
+        assert_eq!(roll.sides.get(), 100);
         assert_eq!(res, Value::Int(roll.total));
     }
 

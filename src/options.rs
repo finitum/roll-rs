@@ -53,11 +53,11 @@ impl Options {
 impl fmt::Display for Options {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "{}", self.source)?;
-        writeln!(f, "{}^", " ".repeat(self.lastpos as usize));
+        writeln!(f, "{}^", " ".repeat(self.lastpos as usize))?;
 
         if self.options.len() > 0 {
             writeln!(f, "An error occurred: unexpected character.")?;
-            write!(f, "Expected any of: [");
+            write!(f, "Expected any of: [")?;
             for (index, i) in self.options.iter().enumerate() {
                 write!(f, "{}", i)?;
 
