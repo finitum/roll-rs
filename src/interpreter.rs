@@ -107,6 +107,15 @@ impl Value {
             i => i,
         }
     }
+
+    pub fn pow(self, rhs: Self) -> Self {
+        match (self, rhs) {
+            (Value::Float(i), Value::Float(j)) => Value::Float((i as f64).powf(j as f64)),
+            (Value::Int(i), Value::Float(j)) => Value::Float((i as f64).powf(j as f64)),
+            (Value::Float(i), Value::Int(j)) => Value::Float((i as f64).powf(j as f64)),
+            (Value::Int(i), Value::Int(j)) => Value::Int((i as i64).pow(j as u32)),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -117,6 +126,7 @@ pub enum Ast {
     Div(Box<Ast>, Box<Ast>),
     Mod(Box<Ast>, Box<Ast>),
     IDiv(Box<Ast>, Box<Ast>),
+    Power(Box<Ast>, Box<Ast>),
     Minus(Box<Ast>),
     Dice(
         Option<Box<Ast>>,
@@ -137,6 +147,7 @@ impl Ast {
             Ast::Mul(l, r) => l.interp(rolls)? * r.interp(rolls)?,
             Ast::Mod(l, r) => l.interp(rolls)? % r.interp(rolls)?,
             Ast::IDiv(l, r) => (l.interp(rolls)? / r.interp(rolls)?).floor(),
+            Ast::Power(l, r) => l.interp(rolls)?.pow(r.interp(rolls)?),
 
             Ast::Minus(l) => -l.interp(rolls)?,
 

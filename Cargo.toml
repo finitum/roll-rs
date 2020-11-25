@@ -8,3 +8,6 @@ edition = "2018"
 
 [dependencies]
 rand_core = {version="0.5", features=["getrandom"] }
+
+[dev-dependencies]
+bnf = "0.3"
