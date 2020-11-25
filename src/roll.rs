@@ -2,6 +2,7 @@ use crate::filtermodifier::FilterModifier;
 use rand_core::RngCore;
 use std::num::NonZeroU64;
 
+#[derive(Debug)]
 pub struct Roll {
     pub vals: Vec<u64>,
     pub total: i64,
@@ -15,9 +16,9 @@ pub fn roll_die(
     mut rng: impl RngCore,
 ) -> Roll {
     let mut rolls = Vec::new();
-    let range = (sides.get() - 1) + 1;
+    let range = sides.get();
     for _ in 0..times {
-        let roll = rng.next_u64() % range + 1;
+        let roll = (rng.next_u64() % range) + 1;
         rolls.push(roll);
     }
 
@@ -40,6 +41,17 @@ pub fn roll_die(
         }
         FilterModifier::None => {}
     }
+
+    // Shuffle order of results again
+    if rolls.len() > 0 {
+        let range = rolls.len() as u64;
+        for _ in 0..rolls.len()+1 {
+            let a = rng.next_u64() % range + 1;
+            let b = rng.next_u64() % range + 1;
+            rolls.swap(a as usize - 1, b as usize - 1);
+        }
+    }
+
 
     Roll {
         total: rolls.iter().sum::<u64>() as i64,

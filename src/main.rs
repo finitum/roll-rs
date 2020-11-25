@@ -12,17 +12,21 @@ use std::num::NonZeroU64;
 use std::{env, process};
 
 fn main() {
-    let argv: Vec<String> = env::args().skip(1).into_iter().collect();
+    let argv: Vec<String> = env::args().skip(1).collect();
     let args = argv.join(" ");
-
+    
     match args.as_str() {
         "stats" => roll_stats(),
         "dir" => roll_dir(),
         "-h" | "--help" | "" => {
             print_usage(0);
         }
-        _ => {
-            dice_roller(&args);
+        a => {
+            if let Some(rest) = a.strip_prefix("-a") {
+                dice_roller(rest, true);
+            } else {
+                dice_roller(&args, false);
+            }
         }
     }
 }
@@ -74,8 +78,11 @@ fn roll_dir() {
     println!("{}", DIR[value.total as usize - 1])
 }
 
-fn dice_roller(s: &str) {
+fn dice_roller(s: &str, advanced: bool) {
     let mut p = Parser::new(s);
+    if advanced {
+        p = p.advanced()
+    }
 
     let ast = match p.parse() {
         Ok(i) => i,
@@ -94,9 +101,21 @@ fn dice_roller(s: &str) {
         }
     };
 
+    rolls.sort_by_key(|i| i.0);
+
+    let mut header = String::new();
+    for (x, roll) in &rolls {
+        for _ in header.len()..(*x as usize) {
+            header.push(' ');
+        }
+        header.push_str(&format!("d{}", roll.sides))
+    }
+
+    println!("{}", header);
     println!("{} = {}", s, total);
 
     let mut rows = Vec::new();
+
 
     for (x, roll) in rolls {
         while roll.vals.len() > rows.len() {
@@ -104,6 +123,7 @@ fn dice_roller(s: &str) {
         }
 
         for (index, val) in roll.vals.iter().enumerate() {
+
             for _ in rows[index].len()..(x as usize) {
                 rows[index].push(' ');
             }
@@ -114,5 +134,36 @@ fn dice_roller(s: &str) {
 
     for row in rows {
         println!("{}", row);
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::parser::Parser;
+
+    fn grammar() -> bnf::Grammar {
+        include_str!("../grammar.bnf").parse().unwrap()
+    }
+
+    fn generate_sentence() -> String {
+        loop {
+            let res = grammar().generate();
+            match res {
+                Ok(i) => break i,
+                Err(bnf::Error::RecursionLimit(_)) => continue,
+                _ => panic!("aaaaa")
+            }
+        }
+    }
+
+    #[test]
+    fn fuzz() {
+        for _ in 0..500 {
+            let sentence = generate_sentence();
+            if let Err(e) =  Parser::new(&sentence).advanced().parse() {
+                println!("failed with sentence \"{}\" and error: {:?}", sentence, e);
+                break;
+            }
+        }
     }
 }
