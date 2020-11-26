@@ -139,7 +139,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "roll-rs"
+name = "roll"
+version = "0.1.0"
+dependencies = [
+ "roll-lib",
+]
+
+[[package]]
+name = "roll-lib"
 version = "0.1.0"
 dependencies = [
  "bnf",

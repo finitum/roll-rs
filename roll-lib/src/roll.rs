@@ -60,6 +60,30 @@ pub fn roll_die(
     }
 }
 
+const DIR: &[&str] = &[
+    "North",
+    "North East",
+    "East",
+    "South East",
+    "South",
+    "South West",
+    "West",
+    "North West",
+    "Stay",
+];
+
+pub fn roll_direction(rng: impl RngCore) -> String {
+    let value = roll_die(
+        1,
+        NonZeroU64::new(DIR.len() as u64).unwrap(),
+        FilterModifier::None,
+        rng,
+    );
+    return DIR[value.total as usize - 1].to_string()
+}
+
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
