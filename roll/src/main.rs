@@ -1,5 +1,5 @@
 use roll_lib::rand_core::OsRng;
-use roll_lib::{roll_direction, Parser, Roll, inplace_interp};
+use roll_lib::{inplace_interp, roll_direction, Parser, Roll};
 use std::{env, process};
 
 fn main() {
@@ -16,18 +16,16 @@ fn main() {
             let mut advanced = false;
             let mut short = false;
 
-            argv.retain(|x| {
-                match x.as_str() {
-                    "-a" => {
-                        advanced = true;
-                        false
-                    }
-                    "-s" => {
-                        short = true;
-                        false
-                    }
-                    _ => true
+            argv.retain(|x| match x.as_str() {
+                "-a" => {
+                    advanced = true;
+                    false
                 }
+                "-s" => {
+                    short = true;
+                    false
+                }
+                _ => true,
             });
 
             if short {
@@ -66,8 +64,6 @@ fn dice_roller(s: &str, advanced: bool) {
             process::exit(1)
         }
     };
-
-    println!("ast : {}\n", ast);
 
     let mut rolls = Vec::new();
     let total = match ast.interp(&mut rolls) {

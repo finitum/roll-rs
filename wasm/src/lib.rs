@@ -1,6 +1,6 @@
 use roll_lib::Parser;
-use serde::Serialize;
 use serde::Deserialize;
+use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
 // to build:  wasm-pack build --target web
@@ -18,13 +18,13 @@ pub fn init_console() {
     console_error_panic_hook::set_once();
 }
 
-#[derive(Debug,PartialEq,Serialize,Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum ObjType {
     JsRoll,
     JsRolls,
 }
 
-#[derive(Serialize,Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct JsRoll {
     #[serde(rename = "type")]
     pub obj_type: ObjType,
@@ -34,7 +34,7 @@ pub struct JsRoll {
     pub dpos: u64,
 }
 
-#[derive(Serialize,Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct JsRolls {
     #[serde(rename = "type")]
     pub obj_type: ObjType,
