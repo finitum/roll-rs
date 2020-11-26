@@ -15,6 +15,15 @@ pub enum Value {
     Int(i64),
 }
 
+impl Into<f64> for Value {
+    fn into(self) -> f64 {
+        match self {
+            Self::Int(i) => i as f64,
+            Self::Float(f) => f,
+        }
+    }
+}
+
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
