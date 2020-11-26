@@ -1,6 +1,6 @@
+use roll_lib::Parser;
+use serde::Serialize;
 use wasm_bindgen::prelude::*;
-use roll_lib::{Parser};
-use serde::{Serialize};
 
 // to build:  wasm-pack build --target web
 
@@ -17,7 +17,7 @@ pub fn init_console() {
 #[derive(Serialize)]
 pub enum ObjType {
     JsRoll,
-    JsRolls
+    JsRolls,
 }
 
 #[derive(Serialize)]
@@ -35,7 +35,7 @@ pub struct JsRolls {
     #[serde(rename = "type")]
     pub obj_type: ObjType,
     pub rolls: Vec<JsRoll>,
-    pub total: f64
+    pub total: f64,
 }
 
 #[wasm_bindgen]
@@ -44,23 +44,24 @@ pub fn roll_dice(s: &str) -> Result<JsValue, JsValue> {
 
     let ast = match p.parse() {
         Ok(i) => i,
-        Err(e) => {
-            return Err(JsValue::from(e.to_string()))
-        }
+        Err(e) => return Err(JsValue::from(e.to_string())),
     };
 
     let mut rolls = Vec::new();
     let res = ast.interp(&mut rolls).unwrap();
 
-    let rolls: Vec<JsRoll> = rolls.into_iter().map(|(dpos, r)| JsRoll{
-        obj_type: ObjType::JsRoll,
-        vals: r.vals,
-        total: r.total,
-        sides: r.sides.get(),
-        dpos
-    }).collect();
+    let rolls: Vec<JsRoll> = rolls
+        .into_iter()
+        .map(|(dpos, r)| JsRoll {
+            obj_type: ObjType::JsRoll,
+            vals: r.vals,
+            total: r.total,
+            sides: r.sides.get(),
+            dpos,
+        })
+        .collect();
 
-    let res = JsRolls{
+    let res = JsRolls {
         obj_type: ObjType::JsRolls,
         total: res.into(),
         rolls,
