@@ -3,9 +3,9 @@ use crate::roll::{roll_die, Roll};
 use core::fmt;
 use core::option::Option::Some;
 use core::result::Result::{Err, Ok};
-use rand_core::OsRng;
 use std::num::NonZeroU64;
 use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
+use std::fmt::{Display};
 
 pub const DEFAULT_SIDES: &str = "20";
 
@@ -138,6 +138,70 @@ pub enum Ast {
     Const(String),
 }
 
+
+impl Display for Ast {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Ast::Add(l, r) => {
+                l.fmt(f)?;
+                write!(f, " + ")?;
+                r.fmt(f)?;
+            }
+            Ast::Sub(l, r) => {
+                l.fmt(f)?;
+                write!(f, " - ")?;
+                r.fmt(f)?;
+            }
+            Ast::Mul(l, r) => {
+                l.fmt(f)?;
+                write!(f, " * ")?;
+                r.fmt(f)?;
+            }
+            Ast::Div(l, r) => {
+                l.fmt(f)?;
+                write!(f, " / ")?;
+                r.fmt(f)?;
+            }
+            Ast::Mod(l, r) => {
+                l.fmt(f)?;
+                write!(f, " mod ")?;
+                r.fmt(f)?;
+            }
+            Ast::IDiv(l, r) => {
+                l.fmt(f)?;
+                write!(f, " // ")?;
+                r.fmt(f)?;
+            }
+            Ast::Power(l, r) => {
+                l.fmt(f)?;
+                write!(f, " ** ")?;
+                r.fmt(f)?;
+            }
+            Ast::Minus(t) => {
+                write!(f, "-")?;
+                t.fmt(f)?;
+            }
+            Ast::Dice(times, sides, fm, _) => {
+                if let Some(t) = times {
+                    t.fmt(f)?;
+                }
+
+                write!(f, "d")?;
+
+                if let Some(s) = sides {
+                    s.fmt(f)?;
+                }
+
+                fm.fmt(f)?;
+
+            }
+            Ast::Const(s) => f.write_str(s)?
+        }
+
+        Ok(())
+    }
+}
+
 impl Ast {
     pub fn interp(self, rolls: &mut Vec<(u64, Roll)>) -> Result<Value, String> {
         Ok(match self {
@@ -148,9 +212,7 @@ impl Ast {
             Ast::Mod(l, r) => l.interp(rolls)? % r.interp(rolls)?,
             Ast::IDiv(l, r) => (l.interp(rolls)? / r.interp(rolls)?).floor(),
             Ast::Power(l, r) => l.interp(rolls)?.pow(r.interp(rolls)?),
-
             Ast::Minus(l) => -l.interp(rolls)?,
-
             Ast::Const(val) => {
                 let dots = val.matches('.').count();
                 if dots == 0 {
@@ -194,7 +256,7 @@ impl Ast {
                         lv as u64,
                         NonZeroU64::new(rv as u64).ok_or("Can't roll zero sided die")?,
                         fm_int,
-                        OsRng,
+                        rand_core::OsRng,
                     );
                     let total = roll.total;
 

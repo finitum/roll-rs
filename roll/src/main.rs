@@ -33,6 +33,35 @@ fn roll_dir() {
     println!("{}", dir);
 }
 
+fn dice_roller_short(s: &str, advanced: bool) {
+    let mut p = Parser::new(s);
+    if advanced {
+        p = p.advanced()
+    }
+
+    let ast = match p.parse() {
+        Ok(i) => i,
+        Err(e) => {
+            eprintln!("{}", e);
+            process::exit(1)
+        }
+    };
+
+    let mut rolls = Vec::new();
+    let total = match ast.interp(&mut rolls) {
+        Ok(i) => i,
+        Err(e) => {
+            eprintln!("{}", e);
+            process::exit(2)
+        }
+    };
+
+    // d8 + 2d4: [4] + [2,2] = 8
+    // /\d*d\d*/something/
+
+
+}
+
 fn dice_roller(s: &str, advanced: bool) {
     let mut p = Parser::new(s);
     if advanced {
@@ -46,6 +75,8 @@ fn dice_roller(s: &str, advanced: bool) {
             process::exit(1)
         }
     };
+
+    println!("ast : {}\n", ast);
 
     let mut rolls = Vec::new();
     let total = match ast.interp(&mut rolls) {

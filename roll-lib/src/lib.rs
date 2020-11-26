@@ -21,7 +21,7 @@ mod test {
             match res {
                 Ok(i) => break i,
                 Err(bnf::Error::RecursionLimit(_)) => continue,
-                _ => panic!("aaaaa")
+                _ => panic!("aaaaa"),
             }
         }
     }
@@ -32,7 +32,7 @@ mod test {
 
         for _ in 0..500 {
             let sentence = generate_sentence(&grammar);
-            if let Err(e) =  Parser::new(&sentence).advanced().parse() {
+            if let Err(e) = Parser::new(&sentence).advanced().parse() {
                 println!("failed with sentence \"{}\" and error: {:?}", sentence, e);
                 break;
             }
