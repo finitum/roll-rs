@@ -3,9 +3,9 @@ use crate::roll::{roll_die, Roll};
 use core::fmt;
 use core::option::Option::Some;
 use core::result::Result::{Err, Ok};
+use std::fmt::Display;
 use std::num::NonZeroU64;
 use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
-use std::fmt::{Display};
 
 pub const DEFAULT_SIDES: &str = "20";
 
@@ -147,7 +147,6 @@ pub enum Ast {
     Const(String),
 }
 
-
 impl Display for Ast {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -202,9 +201,8 @@ impl Display for Ast {
                 }
 
                 fm.fmt(f)?;
-
             }
-            Ast::Const(s) => f.write_str(s)?
+            Ast::Const(s) => f.write_str(s)?,
         }
 
         Ok(())
