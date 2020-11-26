@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rust + Wasm</title>
+</head>
+<body>
+<script type="module">
+    import init, {hello_world, roll_dice} from "../pkg/wasm.js";
+
+    async function run() {
+        await init();
+
+        console.log(hello_world())
+        console.log(roll_dice("2d8"))
+    }
+    run();
+</script>
+</body>
+</html>
