@@ -4,6 +4,9 @@ use wasm_bindgen::prelude::*;
 
 // to build:  wasm-pack build --target web
 
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
 #[wasm_bindgen]
 pub fn hello_world() -> String {
     "Hello World".to_string()
