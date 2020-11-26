@@ -1,5 +1,6 @@
 use roll_lib::Parser;
 use serde::Serialize;
+use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 
 // to build:  wasm-pack build --target web
@@ -17,13 +18,13 @@ pub fn init_console() {
     console_error_panic_hook::set_once();
 }
 
-#[derive(Serialize)]
+#[derive(Debug,PartialEq,Serialize,Deserialize)]
 pub enum ObjType {
     JsRoll,
     JsRolls,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize,Deserialize)]
 pub struct JsRoll {
     #[serde(rename = "type")]
     pub obj_type: ObjType,
@@ -33,7 +34,7 @@ pub struct JsRoll {
     pub dpos: u64,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize,Deserialize)]
 pub struct JsRolls {
     #[serde(rename = "type")]
     pub obj_type: ObjType,
@@ -75,7 +76,7 @@ pub fn roll_dice(s: &str) -> Result<JsValue, JsValue> {
 
 #[cfg(test)]
 mod test {
-    use crate::hello_world;
+    use super::*;
     use wasm_bindgen_test::*;
 
     wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
@@ -83,5 +84,23 @@ mod test {
     #[wasm_bindgen_test]
     fn test_hello_world() {
         assert_eq!(hello_world(), "Hello World")
+    }
+
+    #[wasm_bindgen_test]
+    fn smoke() {
+        let res = roll_dice("(2d8 + 5) * 12 // 3 + 2d%kh").unwrap();
+        let de: JsRolls = serde_wasm_bindgen::from_value(res).unwrap();
+        assert_eq!(ObjType::JsRolls, de.obj_type);
+        assert_eq!(2, de.rolls.len());
+
+        for roll in &de.rolls {
+            assert_eq!(ObjType::JsRoll, roll.obj_type);
+        }
+
+        assert_eq!(8, de.rolls[0].sides);
+        assert_eq!(2, de.rolls[0].vals.len());
+
+        assert_eq!(100, de.rolls[1].sides);
+        assert_eq!(1, de.rolls[1].vals.len());
     }
 }
