@@ -122,6 +122,7 @@ impl Value {
             (Value::Float(i), Value::Float(j)) => Value::Float((i as f64).powf(j as f64)),
             (Value::Int(i), Value::Float(j)) => Value::Float((i as f64).powf(j as f64)),
             (Value::Float(i), Value::Int(j)) => Value::Float((i as f64).powf(j as f64)),
+            (Value::Int(i), Value::Int(j))  if j < 0 => Value::Float((i as f64).powf(j as f64)),
             (Value::Int(i), Value::Int(j)) => Value::Int((i as i64).pow(j as u32)),
         }
     }

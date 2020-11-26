@@ -1,31 +1,51 @@
 use roll_lib::rand_core::OsRng;
-use roll_lib::{roll_direction, Parser, Roll};
+use roll_lib::{roll_direction, Parser, Roll, inplace_interp};
 use std::{env, process};
 
 fn main() {
-    let argv: Vec<String> = env::args().skip(1).collect();
+    let mut argv: Vec<String> = env::args().skip(1).collect();
     let args = argv.join(" ");
 
     match args.as_str() {
         "stats" => roll_stats(),
         "dir" => roll_dir(),
         "-h" | "--help" | "" => {
-            print_usage(0);
+            print_usage();
         }
-        a => {
-            if let Some(rest) = a.strip_prefix("-a") {
-                dice_roller(rest, true);
+        _ => {
+            let mut advanced = false;
+            let mut short = false;
+
+            argv.retain(|x| {
+                match x.as_str() {
+                    "-a" => {
+                        advanced = true;
+                        false
+                    }
+                    "-s" => {
+                        short = true;
+                        false
+                    }
+                    _ => true
+                }
+            });
+
+            if short {
+                println!("{}", inplace_interp(&argv.join(" "), advanced));
             } else {
-                dice_roller(&args, false);
+                dice_roller(&argv.join(" "), advanced);
             }
         }
     }
 }
 
-fn print_usage(code: i32) -> ! {
+fn print_usage() -> ! {
     println!("Syntax is: roll <dice_code>\nExample: roll 2d8 + 6 + d8");
     println!("Instead of a dice code you can also put \"stats\" or \"dir\" for a stats roll or direction roll respectively");
-    process::exit(code)
+    println!("\nArgs: ");
+    println!("  -a: advanced mode (composite dice notation)");
+    println!("  -s: smaller output");
+    process::exit(0);
 }
 
 fn roll_dir() {

@@ -147,15 +147,16 @@ impl<'a> Parser<'a> {
             } else if self.accept_string("mod", options.clone()).is_ok() {
                 '%'
             } else {
+                options = options.add_str("mod");
+                options = options.add_str("//");
                 break;
             };
 
             if op == '/' && self.accept('/', options.clone()).is_ok() {
                 op = 'i'
+            } else {
+                options = options.add('/');
             }
-
-            options = options.add('/');
-            options = options.add_str("mod");
 
             let right = self.parse_factor(options.clone())?;
 
