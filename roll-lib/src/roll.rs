@@ -2,7 +2,7 @@ use crate::filtermodifier::FilterModifier;
 use rand_core::RngCore;
 use std::num::NonZeroU64;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Roll {
     pub vals: Vec<u64>,
     pub total: i64,

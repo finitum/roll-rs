@@ -5,3 +5,6 @@ members = [
     "roll-lib",
     "wasm"
 ]
+
+[profile.release]
+lto = true
