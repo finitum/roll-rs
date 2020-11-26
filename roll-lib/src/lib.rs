@@ -11,14 +11,13 @@ pub use rand_core;
 #[cfg(test)]
 mod test {
     use crate::parser::Parser;
+    use bnf::Grammar;
 
-    fn grammar() -> bnf::Grammar {
-        include_str!("../../grammar.bnf").parse().unwrap()
-    }
+    const GRAMMAR: &str = include_str!("../../grammar.bnf");
 
-    fn generate_sentence() -> String {
+    fn generate_sentence(g: &Grammar) -> String {
         loop {
-            let res = grammar().generate();
+            let res = g.generate();
             match res {
                 Ok(i) => break i,
                 Err(bnf::Error::RecursionLimit(_)) => continue,
@@ -29,8 +28,10 @@ mod test {
 
     #[test]
     fn fuzz() {
+        let grammar: Grammar = GRAMMAR.parse().unwrap();
+
         for _ in 0..500 {
-            let sentence = generate_sentence();
+            let sentence = generate_sentence(&grammar);
             if let Err(e) =  Parser::new(&sentence).advanced().parse() {
                 println!("failed with sentence \"{}\" and error: {:?}", sentence, e);
                 break;
