@@ -20,4 +20,4 @@ wee_alloc = "0.4"
 wasm-bindgen-test = "0.3"
 
 [package.metadata.wasm-pack.profile.release]
-wasm-opt = ['-O4', "--enable-mutable-globals"]
+wasm-opt = ["-Oz", "--enable-mutable-globals"]
