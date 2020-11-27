@@ -23,7 +23,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn advanced(mut self) -> Self{
+    pub fn advanced(mut self) -> Self {
         self.advanced = true;
         self
     }
@@ -141,22 +141,23 @@ impl<'a> Parser<'a> {
         let mut res = self.parse_factor(options.clone())?;
 
         loop {
-
             let opres = self.accept_any(&['*', '/'], options.clone(), None);
             let mut op = if let Ok(i) = opres {
                 i
             } else if self.accept_string("mod", options.clone()).is_ok() {
                 '%'
             } else {
-                break
+                //FIXME options assigned but never read
+                options = options.add_str("mod");
+                options = options.add_str("//");
+                break;
             };
 
             if op == '/' && self.accept('/', options.clone()).is_ok() {
                 op = 'i'
+            } else {
+                options = options.add('/');
             }
-
-            options = options.add('/');
-            options = options.add_str("mod");
 
             let right = self.parse_factor(options.clone())?;
 
@@ -201,7 +202,6 @@ impl<'a> Parser<'a> {
             Err(mut o) => {
                 self.restore(backup);
 
-
                 let backup = self.backup();
                 if self.accept('(', o.clone()).is_ok() {
                     let sm = self.parse_sum(o.clone())?;
@@ -241,7 +241,6 @@ impl<'a> Parser<'a> {
             self.parse_number(options.clone()).map(Box::new).ok()
         };
 
-
         self.accept('d', options.clone())?;
         let dpos = self.pos - 1;
 
@@ -260,8 +259,7 @@ impl<'a> Parser<'a> {
             }
             self.restore(backup);
 
-            self
-                .parse_number_or_percent(options.clone())
+            self.parse_number_or_percent(options.clone())
                 .map(Box::new)
                 .ok()
         };
@@ -341,9 +339,9 @@ impl<'a> Parser<'a> {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::filtermodifier::FilterModifier;
     use crate::interpreter::{Ast, Value, DEFAULT_SIDES};
-    use super::*;
 
     #[test]
     pub fn add() {

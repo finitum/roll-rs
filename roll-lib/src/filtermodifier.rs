@@ -1,3 +1,6 @@
+use std::fmt;
+use std::fmt::{Display, Formatter};
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum FilterModifier<T> {
     KeepLowest(T),
@@ -5,6 +8,32 @@ pub enum FilterModifier<T> {
     DropLowest(T),
     DropHighest(T),
     None,
+}
+
+impl<T: Display> Display for FilterModifier<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::KeepLowest(v) => {
+                write!(f, "kl")?;
+                v.fmt(f)?
+            }
+            Self::KeepHighest(v) => {
+                write!(f, "kl")?;
+                v.fmt(f)?
+            }
+            Self::DropLowest(v) => {
+                write!(f, "dl")?;
+                v.fmt(f)?
+            }
+            Self::DropHighest(v) => {
+                write!(f, "dh")?;
+                v.fmt(f)?
+            }
+            Self::None => {}
+        }
+
+        Ok(())
+    }
 }
 
 impl<T> FilterModifier<T> {

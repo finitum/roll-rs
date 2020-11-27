@@ -2,7 +2,7 @@ use crate::filtermodifier::FilterModifier;
 use rand_core::RngCore;
 use std::num::NonZeroU64;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Roll {
     pub vals: Vec<u64>,
     pub total: i64,
@@ -43,15 +43,14 @@ pub fn roll_die(
     }
 
     // Shuffle order of results again
-    if rolls.len() > 0 {
+    if !rolls.is_empty() {
         let range = rolls.len() as u64;
-        for _ in 0..rolls.len()+1 {
+        for _ in 0..rolls.len() + 1 {
             let a = rng.next_u64() % range + 1;
             let b = rng.next_u64() % range + 1;
             rolls.swap(a as usize - 1, b as usize - 1);
         }
     }
-
 
     Roll {
         total: rolls.iter().sum::<u64>() as i64,
@@ -79,10 +78,8 @@ pub fn roll_direction(rng: impl RngCore) -> String {
         FilterModifier::None,
         rng,
     );
-    return DIR[value.total as usize - 1].to_string()
+    DIR[value.total as usize - 1].to_string()
 }
-
-
 
 #[cfg(test)]
 mod tests {
