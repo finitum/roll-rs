@@ -2,19 +2,35 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Rust + Wasm</title>
+    <title>Wasm Dice Roller</title>
 </head>
 <body>
 <script type="module">
-    import init, {hello_world, roll_dice} from "../pkg/wasm.js";
+    import init, {roll_dice_short} from "../pkg/wasm.js";
 
-    async function run() {
-        await init();
+    let inited = false;
+    async function roll_wrapper() {
+        if (!inited) {
+            await init();
+            inited = true;
+        }
 
-        console.log(hello_world())
-        console.log(roll_dice("2d8 + 20 + 4d12"))
+        const input = document.getElementById("input").value;
+        if(input) {
+            document.getElementById("result").textContent = roll_dice_short(input, false);
+        }
     }
-    run();
+
+    window.roll_wrapper = roll_wrapper
 </script>
+<div class="container">
+    <label>
+        Roll:
+        <input type="text" id="input"/>
+        <button onclick="roll_wrapper()">Roll!</button>
+    </label>
+    <br>
+    <span id="result"></span>
+</div>
 </body>
 </html>

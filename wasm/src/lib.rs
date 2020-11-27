@@ -44,7 +44,7 @@ pub struct JsRolls {
 
 #[wasm_bindgen]
 pub fn roll_dice_short(s: &str, advanced: bool) -> Result<String, JsValue> {
-    roll_inline(s, advanced).map_err(JsValue::from)
+    roll_inline(s, advanced).map_err(|s| JsValue::from(String::from("\n".to_string() + &s)))
 }
 
 #[wasm_bindgen]
