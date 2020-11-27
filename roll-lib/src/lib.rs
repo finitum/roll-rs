@@ -10,18 +10,31 @@ pub use crate::roll::*;
 pub use rand_core;
 use std::collections::HashMap;
 
-pub fn inplace_interp(s: &str, advanced: bool) -> String {
-    let mut p = Parser::new(s);
-    if advanced {
-        p.advanced = true;
+const STAT_ROLL: &str = "4d6l";
+pub fn roll_stats() -> String {
+    let mut res = String::new();
+    fn roll_stat() -> Roll {
+        let mut rolls = Vec::new();
+        Parser::new(STAT_ROLL)
+            .parse()
+            .unwrap()
+            .interp(&mut rolls)
+            .unwrap();
+        rolls.remove(0).1
     }
 
-    let ast = match p.parse() {
-        Ok(i) => i,
-        Err(e) => {
-            panic!("{}", e);
-        }
-    };
+    for _ in 0..6 {
+        let roll = roll_stat();
+        res.push_str(&format!("{:2}: {:?}\n", roll.total, roll.vals))
+    }
+    res
+}
+
+pub fn roll_inline(s: &str, advanced: bool) -> Result<String, String> {
+    let mut p = Parser::new(s);
+    p.advanced = advanced;
+
+    let ast = p.parse().map_err(|e| e.to_string())?;
 
     let copy = ast.clone();
 
@@ -34,7 +47,7 @@ pub fn inplace_interp(s: &str, advanced: bool) -> String {
     }
 
     let res = replace_rolls(copy, &map, |roll| format!("{:?}", roll.vals));
-    format!("{} = {} = {}", s, res, total)
+    Ok(format!("{} = {} = {}", s, res, total))
 }
 
 fn replace_rolls(ast: Ast, lookup: &HashMap<u64, Roll>, func: fn(&Roll) -> String) -> Ast {
@@ -69,6 +82,8 @@ fn replace_rolls(ast: Ast, lookup: &HashMap<u64, Roll>, func: fn(&Roll) -> Strin
         ),
         Ast::Minus(l) => Ast::Minus(Box::from(replace_rolls(*l, lookup, func))),
         Ast::Dice(_, _, _, pos) => {
+            // Safety: we exhaustively add all positions to this hashmap so it must contain everything
+            // we look up.
             let roll = lookup.get(&pos).unwrap();
             Ast::Const(func(roll))
         }
@@ -110,6 +125,6 @@ mod test {
 
     #[test]
     fn test_inplace() {
-        println!("{}", inplace_interp("4d8 + 2d8", false));
+        println!("{}", roll_inline("4d8 + 2d8", false).unwrap());
     }
 }
