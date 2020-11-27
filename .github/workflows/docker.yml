@@ -54,7 +54,6 @@ jobs:
           username: NULLx76
           password: ${{ secrets.CR_PAT }}
 
-
       - name: Build and push wasm
         id: docker_build_wasm
         uses: docker/build-push-action@v2
