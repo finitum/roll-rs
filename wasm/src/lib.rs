@@ -1,4 +1,4 @@
-use roll_lib::Parser;
+use roll_lib::{roll_inline, Parser};
 use serde::Deserialize;
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
@@ -43,13 +43,16 @@ pub struct JsRolls {
 }
 
 #[wasm_bindgen]
-pub fn roll_dice(s: &str) -> Result<JsValue, JsValue> {
-    let mut p = Parser::new(s);
+pub fn roll_dice_short(s: &str, advanced: bool) -> Result<String, JsValue> {
+    roll_inline(s, advanced).map_err(JsValue::from)
+}
 
-    let ast = match p.parse() {
-        Ok(i) => i,
-        Err(e) => return Err(JsValue::from(e.to_string())),
-    };
+#[wasm_bindgen]
+pub fn roll_dice(s: &str, advanced: bool) -> Result<JsValue, JsValue> {
+    let mut p = Parser::new(s);
+    p.advanced = advanced;
+
+    let ast = p.parse().map_err(|e| JsValue::from(e.to_string()))?;
 
     let mut rolls = Vec::new();
     let res = ast.interp(&mut rolls).unwrap();
@@ -87,8 +90,8 @@ mod test {
     }
 
     #[wasm_bindgen_test]
-    fn smoke() {
-        let res = roll_dice("(2d8 + 5) * 12 // 3 + 2d%kh").unwrap();
+    fn smoke_roll_dice() {
+        let res = roll_dice("(2d8 + 5) * 12 // 3 + 2d%kh", true).unwrap();
         let de: JsRolls = serde_wasm_bindgen::from_value(res).unwrap();
         assert_eq!(ObjType::JsRolls, de.obj_type);
         assert_eq!(2, de.rolls.len());
@@ -102,5 +105,11 @@ mod test {
 
         assert_eq!(100, de.rolls[1].sides);
         assert_eq!(1, de.rolls[1].vals.len());
+    }
+
+    #[wasm_bindgen_test]
+    fn smoke_roll_short() {
+        let res = roll_dice_short("4d8", false).unwrap();
+        assert!(res.contains("4d8"))
     }
 }

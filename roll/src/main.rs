@@ -1,27 +1,27 @@
 use roll_lib::rand_core::OsRng;
-use roll_lib::{inplace_interp, roll_direction, Parser, Roll};
+use roll_lib::{roll_direction, roll_inline, roll_stats, Parser};
 use std::{env, process};
 
 fn main() {
-    let mut argv: Vec<String> = env::args().skip(1).collect();
-    let args = argv.join(" ");
+    if env::args().len() <= 1 {
+        print_usage()
+    }
 
-    match args.as_str() {
-        "stats" => roll_stats(),
-        "dir" => roll_dir(),
-        "-h" | "--help" | "" => {
-            print_usage();
-        }
+    let mut argv: Vec<String> = env::args().skip(1).collect();
+    match argv[0].as_str() {
+        "stats" => print_roll_stats(),
+        "dir" => print_roll_dir(),
+        "-h" | "--help" | "" => print_usage(),
         _ => {
             let mut advanced = false;
             let mut short = false;
 
             argv.retain(|x| match x.as_str() {
-                "-a" => {
+                "-a" | "--advanced" => {
                     advanced = true;
                     false
                 }
-                "-s" => {
+                "-s" | "--short" => {
                     short = true;
                     false
                 }
@@ -29,9 +29,9 @@ fn main() {
             });
 
             if short {
-                println!("{}", inplace_interp(&argv.join(" "), advanced));
+                roll_short(&argv.join(" "), advanced)
             } else {
-                dice_roller(&argv.join(" "), advanced);
+                roll_long(&argv.join(" "), advanced);
             }
         }
     }
@@ -46,16 +46,24 @@ fn print_usage() -> ! {
     process::exit(0);
 }
 
-fn roll_dir() {
+fn print_roll_dir() {
     let dir = roll_direction(OsRng);
     println!("{}", dir);
 }
 
-fn dice_roller(s: &str, advanced: bool) {
-    let mut p = Parser::new(s);
-    if advanced {
-        p = p.advanced()
+fn roll_short(s: &str, advanced: bool) {
+    match roll_inline(s, advanced) {
+        Ok(s) => println!("{}", s),
+        Err(e) => {
+            eprintln!("{}", e);
+            process::exit(2);
+        }
     }
+}
+
+fn roll_long(s: &str, advanced: bool) {
+    let mut p = Parser::new(s);
+    p.advanced = advanced;
 
     let ast = match p.parse() {
         Ok(i) => i,
@@ -108,20 +116,6 @@ fn dice_roller(s: &str, advanced: bool) {
     }
 }
 
-const STAT_ROLL: &str = "4d6l";
-fn roll_stats() {
-    fn roll_stat() -> Roll {
-        let mut rolls = Vec::new();
-        Parser::new(STAT_ROLL)
-            .parse()
-            .unwrap()
-            .interp(&mut rolls)
-            .unwrap();
-        rolls.remove(0).1
-    }
-
-    for _ in 0..6 {
-        let roll = roll_stat();
-        println!("{:2}: {:?}", roll.total, roll.vals)
-    }
+fn print_roll_stats() {
+    print!("{}", roll_stats())
 }
