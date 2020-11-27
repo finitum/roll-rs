@@ -1,0 +1,34 @@
+name: Github Pages
+
+on:
+  push:
+    branches:
+      - master
+      - pages
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  pages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: jetli/wasm-pack-action@v0.3.0
+        with:
+          version: 'latest'
+      - name: Build
+        run: cd wasm && wasm-pack build --target web
+      - name: Prepare Deploy
+        run: |
+          mkdir -p deploy/wasm
+          mv wasm/pkg/* deploy/wasm
+          mv wasm/index.html deploy/
+          sed -i 's/pkg/wasm/g' ./deploy/index.html
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.CR_PAT }}
+          BRANCH: gh-pages # The branch the action should deploy to.
+          FOLDER: deploy # The folder the action should deploy.
+          CLEAN: true # Automatically remove deleted files from the deploy branch
+          SINGLE_COMMIT: true

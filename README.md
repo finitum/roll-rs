@@ -23,7 +23,6 @@ $ roll -a (d8)d(2d4)
 (d8)d(2d4) = 5
  2  3  3
     2  4
-
 ```
 
 ## Notation
