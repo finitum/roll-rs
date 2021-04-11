@@ -1,4 +1,4 @@
-use roll_lib::{roll_inline, Parser};
+use roll_rs::{roll_inline, Parser};
 use serde::Deserialize;
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
@@ -7,11 +7,6 @@ use wasm_bindgen::prelude::*;
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
-#[wasm_bindgen]
-pub fn hello_world() -> String {
-    "Hello World".to_string()
-}
 
 #[wasm_bindgen(start)]
 pub fn init_console() {
@@ -44,7 +39,7 @@ pub struct JsRolls {
 
 #[wasm_bindgen]
 pub fn roll_dice_short(s: &str, advanced: bool) -> Result<String, JsValue> {
-    roll_inline(s, advanced).map_err(|s| JsValue::from(String::from("\n".to_string() + &s)))
+    roll_inline(s, advanced).map_err(|s| JsValue::from("\n".to_string() + &s))
 }
 
 #[wasm_bindgen]
@@ -83,11 +78,6 @@ mod test {
     use wasm_bindgen_test::*;
 
     wasm_bindgen_test_configure!(run_in_browser);
-
-    #[wasm_bindgen_test]
-    fn test_hello_world() {
-        assert_eq!(hello_world(), "Hello World")
-    }
 
     #[wasm_bindgen_test]
     fn smoke_roll_dice() {

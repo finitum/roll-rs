@@ -147,9 +147,7 @@ impl<'a> Parser<'a> {
             } else if self.accept_string("mod", options.clone()).is_ok() {
                 '%'
             } else {
-                //FIXME options assigned but never read
-                options = options.add_str("mod");
-                options = options.add_str("//");
+                options.add_str("mod").add_str("//");
                 break;
             };
 
