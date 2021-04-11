@@ -13,7 +13,7 @@ path = "src/lib.rs"
 crate-type = ["rlib", "cdylib"]
 
 [dependencies]
-rand_core = { version="0.6", features=["getrandom"] }
+rand_core = { version="0.5", features=["getrandom"] }
 
 [dev-dependencies]
 bnf = "0.3"
