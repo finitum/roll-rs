@@ -1,5 +1,5 @@
 [package]
-name = "wasm"
+name = "roll-wasm"
 version = "0.1.0"
 authors = ["Victor Roest <victor@xirion.net>"]
 edition = "2018"
@@ -8,7 +8,7 @@ edition = "2018"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-roll-lib = { path = "../roll-lib" }
+roll-rs = { path = "../roll" }
 wasm-bindgen = "0.2"
 rand = { version = "0.7", features = ["wasm-bindgen"], default-features = false }
 serde-wasm-bindgen = "0.1"

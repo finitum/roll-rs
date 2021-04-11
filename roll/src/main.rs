@@ -1,5 +1,5 @@
-use roll_lib::rand_core::OsRng;
-use roll_lib::{roll_direction, roll_inline, roll_stats, Parser};
+use rand_core::OsRng;
+use roll_rs::{roll_direction, roll_inline, roll_stats, Parser};
 use std::{env, process};
 
 fn main() {
@@ -43,7 +43,7 @@ fn print_usage() -> ! {
     println!("\nArgs: ");
     println!("  -a: advanced mode (composite dice notation)");
     println!("  -s: smaller output");
-    process::exit(0);
+    process::exit(0)
 }
 
 fn print_roll_dir() {
