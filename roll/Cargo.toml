@@ -1,10 +1,19 @@
 [package]
-name = "roll"
+name = "roll-rs"
 version = "0.1.0"
-authors = ["Victor Roest <victor@xirion.net>"]
+authors = ["Victor Roest <victor@xirion.net>", "jonay2000 <jonabent@gmail.com>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "roll"
+path = "src/main.rs"
+
+[lib]
+path = "src/lib.rs"
+crate-type = ["rlib", "cdylib"]
 
 [dependencies]
-roll-lib = { path = "../roll-lib" }
+rand_core = { version="0.6", features=["getrandom"] }
+
+[dev-dependencies]
+bnf = "0.3"

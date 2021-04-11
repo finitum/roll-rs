@@ -15,11 +15,11 @@ pub enum Value {
     Int(i64),
 }
 
-impl Into<f64> for Value {
-    fn into(self) -> f64 {
-        match self {
-            Self::Int(i) => i as f64,
-            Self::Float(f) => f,
+impl From<Value> for f64 {
+    fn from(v: Value) -> Self {
+        match v {
+            Value::Int(i) => i as f64,
+            Value::Float(f) => f,
         }
     }
 }

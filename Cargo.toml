@@ -1,8 +1,6 @@
 [workspace]
-
 members = [
     "roll",
-    "roll-lib",
     "wasm"
 ]
 
