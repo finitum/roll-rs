@@ -8,7 +8,19 @@ use crate::interpreter::Ast;
 pub use crate::parser::*;
 pub use crate::roll::*;
 pub use rand_core;
+use core::fmt;
 use std::collections::HashMap;
+
+pub struct RollResult {
+    pub string_result: String,
+    pub dice_total: crate::interpreter::Value,
+}
+
+impl fmt::Display for RollResult {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.string_result)
+    }
+}
 
 const STAT_ROLL: &str = "4d6l";
 pub fn roll_stats() -> String {
@@ -30,7 +42,7 @@ pub fn roll_stats() -> String {
     res
 }
 
-pub fn roll_inline(s: &str, advanced: bool) -> Result<String, String> {
+pub fn roll_inline(s: &str, advanced: bool) -> Result<RollResult, String> {
     let mut p = Parser::new(s);
     p.advanced = advanced;
 
@@ -47,7 +59,8 @@ pub fn roll_inline(s: &str, advanced: bool) -> Result<String, String> {
     }
 
     let res = replace_rolls(copy, &map, |roll| format!("{:?}", roll.vals));
-    Ok(format!("{} = {} = {}", s, res, total))
+    let result: RollResult = RollResult { string_result: format!("{} = {} = {}", s, res, total), dice_total: total };
+    Ok(result)
 }
 
 fn replace_rolls(ast: Ast, lookup: &HashMap<u64, Roll>, func: fn(&Roll) -> String) -> Ast {
