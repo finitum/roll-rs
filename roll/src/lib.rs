@@ -7,8 +7,8 @@ mod roll;
 use crate::interpreter::Ast;
 pub use crate::parser::*;
 pub use crate::roll::*;
-pub use rand_core;
 use core::fmt;
+pub use rand_core;
 use std::collections::HashMap;
 
 pub struct RollResult {
@@ -59,7 +59,10 @@ pub fn roll_inline(s: &str, advanced: bool) -> Result<RollResult, String> {
     }
 
     let res = replace_rolls(copy, &map, |roll| format!("{:?}", roll.vals));
-    let result: RollResult = RollResult { string_result: format!("{} = {} = {}", s, res, total), dice_total: total };
+    let result: RollResult = RollResult {
+        string_result: format!("{} = {} = {}", s, res, total),
+        dice_total: total,
+    };
     Ok(result)
 }
 
