@@ -3,7 +3,7 @@ name = "roll-rs"
 version = "0.3.0"
 authors = ["Victor Roest <victor@xirion.net>", "jonay2000 <jonabent@gmail.com>"]
 repository = "https://github.com/finitum/roll-rs"
-edition = "2018"
+edition = "2021"
 description = "Dice rolling library supporting full dice notation"
 license = "EUPL-1.2"
 keywords = ["dice"]
@@ -17,7 +17,7 @@ path = "src/lib.rs"
 crate-type = ["rlib", "cdylib"]
 
 [dependencies]
-rand_core = { version="0.5", features=["getrandom"] }
+rand_core = { version="0.6", features=["getrandom"] }
 
 [dev-dependencies]
-bnf = "0.3"
+bnf = "0.4"

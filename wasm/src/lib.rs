@@ -13,7 +13,7 @@ pub fn init_console() {
     console_error_panic_hook::set_once();
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ObjType {
     JsRoll,
     JsRolls,
@@ -52,7 +52,7 @@ pub fn roll_dice(s: &str, advanced: bool) -> Result<JsValue, JsValue> {
     let ast = p.parse().map_err(|e| JsValue::from(e.to_string()))?;
 
     let mut rolls = Vec::new();
-    let res = ast.interp(&mut rolls).unwrap();
+    let res = ast.interp(&mut rolls)?;
 
     let rolls: Vec<JsRoll> = rolls
         .into_iter()
