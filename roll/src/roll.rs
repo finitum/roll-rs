@@ -34,10 +34,10 @@ pub fn roll_die(
         }
         FilterModifier::DropLowest(i) => {
             rolls.reverse();
-            rolls.truncate(rolls.len() - i.min(rolls.len() as u64) as usize)
+            rolls.truncate(rolls.len() - i.min(rolls.len() as u64) as usize);
         }
         FilterModifier::DropHighest(i) => {
-            rolls.truncate(rolls.len() - i.min(rolls.len() as u64) as usize)
+            rolls.truncate(rolls.len() - i.min(rolls.len() as u64) as usize);
         }
         FilterModifier::None => {}
     }
@@ -45,7 +45,7 @@ pub fn roll_die(
     // Shuffle order of results again
     if !rolls.is_empty() {
         let range = rolls.len() as u64;
-        for _ in 0..rolls.len() + 1 {
+        for _ in 0..=rolls.len() {
             let a = rng.next_u64() % range + 1;
             let b = rng.next_u64() % range + 1;
             rolls.swap(a as usize - 1, b as usize - 1);

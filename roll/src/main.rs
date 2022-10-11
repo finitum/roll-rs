@@ -29,7 +29,7 @@ fn main() {
             });
 
             if short {
-                roll_short(&argv.join(" "), advanced)
+                roll_short(&argv.join(" "), advanced);
             } else {
                 roll_long(&argv.join(" "), advanced);
             }
@@ -89,7 +89,7 @@ fn roll_long(s: &str, advanced: bool) {
         for _ in header.len()..(*x as usize) {
             header.push(' ');
         }
-        header.push_str(&format!("d{}", roll.sides))
+        header.push_str(&format!("d{}", roll.sides));
     }
 
     println!("{}", header);
@@ -107,7 +107,7 @@ fn roll_long(s: &str, advanced: bool) {
                 rows[index].push(' ');
             }
 
-            rows[index].push_str(&format!("{}", val))
+            rows[index].push_str(&format!("{}", val));
         }
     }
 
@@ -117,5 +117,5 @@ fn roll_long(s: &str, advanced: bool) {
 }
 
 fn print_roll_stats() {
-    print!("{}", roll_stats())
+    print!("{}", roll_stats());
 }
