@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wasm Dice Roller</title>
+</head>
+<body>
+<script type="module">
+    import init, {roll_dice_short} from "./wasm/roll_wasm.js";
+
+    let inited = false;
+    async function roll_wrapper() {
+        if (!inited) {
+            await init();
+            inited = true;
+        }
+
+        const input = document.getElementById("input").value;
+        if(input) {
+            document.getElementById("result").textContent = roll_dice_short(input, false);
+        }
+    }
+
+    window.roll_wrapper = roll_wrapper
+</script>
+<div class="container">
+    <label>
+        Roll:
+        <input type="text" id="input"/>
+        <button onclick="roll_wrapper()">Roll!</button>
+    </label>
+    <br>
+    <span id="result"></span>
+</div>
+</body>
+</html>
