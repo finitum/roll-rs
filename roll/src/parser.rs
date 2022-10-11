@@ -44,18 +44,18 @@ impl<'a> Parser<'a> {
         self.advanced = other.advanced;
     }
 
-    pub fn accept(&mut self, c: char, options: Options) -> Result<(), Options> {
-        self.expect(c, options)?;
+    pub fn accept(&mut self, c: char, options: &Options) -> Result<(), Options> {
+        self.expect(c, &options)?;
 
         self.pos += 1;
         self.expr.next();
         Ok(())
     }
 
-    pub fn accept_string(&mut self, text: &str, options: Options) -> Result<(), Options> {
+    pub fn accept_string(&mut self, text: &str, options: &Options) -> Result<(), Options> {
         let backup = self.backup();
         for c in text.chars() {
-            if let Err(e) = self.accept(c, options.clone()) {
+            if let Err(e) = self.accept(c, options) {
                 self.restore(backup);
                 return Err(e);
             }
@@ -64,7 +64,7 @@ impl<'a> Parser<'a> {
         Ok(())
     }
 
-    pub fn expect(&mut self, c: char, options: Options) -> Result<(), Options> {
+    pub fn expect(&mut self, c: char, options: &Options) -> Result<(), Options> {
         while let Some(i) = self.expr.peek() {
             if !i.is_whitespace() {
                 break;
@@ -77,7 +77,7 @@ impl<'a> Parser<'a> {
         if pk == Some(&c) {
             Ok(())
         } else {
-            Err(options.add(c).pos(self.pos))
+            Err(options.clone().add(c).pos(self.pos))
         }
     }
 
@@ -88,21 +88,21 @@ impl<'a> Parser<'a> {
         name: Option<Options>,
     ) -> Result<char, Options> {
         for i in c {
-            match self.accept(*i, options.clone()) {
+            match self.accept(*i, &options) {
                 Ok(_) => return Ok(*i),
                 Err(o) => {
                     if name.is_none() {
-                        options = options.merge(o)
+                        options = options.merge(o);
                     }
                 }
             }
         }
 
         if let Some(n) = name {
-            options = options.merge(n)
+            options = options.merge(n);
         }
 
-        Err(options)
+        Err(options.clone())
     }
 
     pub fn parse(&mut self) -> Result<Ast, Options> {
@@ -118,10 +118,10 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_expr(&mut self, options: Options) -> Result<Ast, Options> {
-        self.parse_sum(options)
+        self.parse_sum(&options)
     }
 
-    pub fn parse_sum(&mut self, options: Options) -> Result<Ast, Options> {
+    pub fn parse_sum(&mut self, options: &Options) -> Result<Ast, Options> {
         let mut res = self.parse_term(options.clone())?;
 
         while let Ok(op) = self.accept_any(&['+', '-'], options.clone(), None) {
@@ -137,27 +137,28 @@ impl<'a> Parser<'a> {
         Ok(res)
     }
 
-    pub fn parse_term(&mut self, mut options: Options) -> Result<Ast, Options> {
+    pub fn parse_term(&mut self, options: Options) -> Result<Ast, Options> {
         let mut res = self.parse_factor(options.clone())?;
 
         loop {
+            let mut options = options.clone();
             let opres = self.accept_any(&['*', '/'], options.clone(), None);
             let mut op = if let Ok(i) = opres {
                 i
-            } else if self.accept_string("mod", options.clone()).is_ok() {
+            } else if self.accept_string("mod", &options).is_ok() {
                 '%'
             } else {
                 options.add_str("mod").add_str("//");
                 break;
             };
 
-            if op == '/' && self.accept('/', options.clone()).is_ok() {
+            if op == '/' && self.accept('/', &options).is_ok() {
                 op = 'i'
             } else {
                 options = options.add('/');
             }
 
-            let right = self.parse_factor(options.clone())?;
+            let right = self.parse_factor(options)?;
 
             res = match op {
                 '*' => Ast::Mul(Box::new(res), Box::new(right)),
@@ -174,7 +175,7 @@ impl<'a> Parser<'a> {
     pub fn parse_factor(&mut self, options: Options) -> Result<Ast, Options> {
         let backup = self.backup();
 
-        Ok(match self.accept('-', options.clone()) {
+        Ok(match self.accept('-', &options) {
             Ok(_) => Ast::Minus(Box::new(self.parse_power(options)?)),
             Err(o) => {
                 self.restore(backup);
@@ -186,7 +187,7 @@ impl<'a> Parser<'a> {
 
     pub fn parse_power(&mut self, options: Options) -> Result<Ast, Options> {
         let mut res = self.parse_atom(options.clone())?;
-        if self.accept_string("**", options.clone()).is_ok() {
+        if self.accept_string("**", &options).is_ok() {
             let right = self.parse_factor(options)?;
             res = Ast::Power(Box::new(res), Box::new(right));
         }
@@ -201,20 +202,19 @@ impl<'a> Parser<'a> {
                 self.restore(backup);
 
                 let backup = self.backup();
-                if self.accept('(', o.clone()).is_ok() {
-                    let sm = self.parse_sum(o.clone())?;
-                    self.accept(')', o)
+                if self.accept('(', &o).is_ok() {
+                    let sm = self.parse_sum(&o)?;
+                    self.accept(')', &o)
                         .map_err(|e| e.message("missing closing parenthesis"))?;
 
                     return Ok(sm);
-                } else {
-                    o = o
-                        .add('(')
-                        .message("tried to parse expression between parenthesis");
-                    self.restore(backup);
                 }
+                o = o
+                    .add('(')
+                    .message("tried to parse expression between parenthesis");
+                self.restore(backup);
 
-                self.parse_number(o.message("tried to parse dice roll"))?
+                self.parse_number(&o.message("tried to parse dice roll"))?
             }
             Ok(i) => i,
         })
@@ -223,9 +223,9 @@ impl<'a> Parser<'a> {
     pub fn parse_dice(&mut self, mut options: Options) -> Result<Ast, Options> {
         let backup = self.backup();
 
-        let rolls = if self.advanced && self.accept('(', options.clone()).is_ok() {
-            let sm = self.parse_sum(options.clone())?;
-            self.accept(')', options.clone())
+        let rolls = if self.advanced && self.accept('(', &options).is_ok() {
+            let sm = self.parse_sum(&options)?;
+            self.accept(')', &options)
                 .map_err(|e| e.message("missing closing parenthesis"))?;
 
             Some(Box::new(sm))
@@ -236,16 +236,16 @@ impl<'a> Parser<'a> {
                     .message("tried to parse expression between parenthesis");
             }
             self.restore(backup);
-            self.parse_number(options.clone()).map(Box::new).ok()
+            self.parse_number(&options).map(Box::new).ok()
         };
 
-        self.accept('d', options.clone())?;
+        self.accept('d', &options)?;
         let dpos = self.pos - 1;
 
         let backup = self.backup();
-        let sides = if self.advanced && self.accept('(', options.clone()).is_ok() {
-            let sm = self.parse_sum(options.clone())?;
-            self.accept(')', options.clone())
+        let sides = if self.advanced && self.accept('(', &options).is_ok() {
+            let sm = self.parse_sum(&options)?;
+            self.accept(')', &options)
                 .map_err(|e| e.message("missing closing parenthesis"))?;
 
             Some(Box::new(sm))
@@ -262,28 +262,25 @@ impl<'a> Parser<'a> {
                 .ok()
         };
 
-        let fm = if self.accept_string("kh", options.clone()).is_ok()
-            || self.accept('h', options.clone()).is_ok()
+        let fm = if self.accept_string("kh", &options).is_ok() || self.accept('h', &options).is_ok()
         {
             FilterModifier::KeepHighest(Box::new(
-                self.parse_number(options)
+                self.parse_number(&options)
                     .unwrap_or_else(|_| Ast::Const("1".to_string())),
             ))
-        } else if self.accept_string("dl", options.clone()).is_ok()
-            || self.accept('l', options.clone()).is_ok()
-        {
+        } else if self.accept_string("dl", &options).is_ok() || self.accept('l', &options).is_ok() {
             FilterModifier::DropLowest(Box::new(
-                self.parse_number(options)
+                self.parse_number(&options)
                     .unwrap_or_else(|_| Ast::Const("1".to_string())),
             ))
-        } else if self.accept_string("dh", options.clone()).is_ok() {
+        } else if self.accept_string("dh", &options).is_ok() {
             FilterModifier::DropHighest(Box::new(
-                self.parse_number(options)
+                self.parse_number(&options)
                     .unwrap_or_else(|_| Ast::Const("1".to_string())),
             ))
-        } else if self.accept_string("kl", options.clone()).is_ok() {
+        } else if self.accept_string("kl", &options).is_ok() {
             FilterModifier::KeepLowest(Box::new(
-                self.parse_number(options)
+                self.parse_number(&options)
                     .unwrap_or_else(|_| Ast::Const("1".to_string())),
             ))
         } else {
@@ -294,19 +291,19 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_number_or_percent(&mut self, options: Options) -> Result<Ast, Options> {
-        if self.accept('%', options.clone()).is_ok() {
+        if self.accept('%', &options).is_ok() {
             Ok(Ast::Const("100".to_ascii_lowercase()))
         } else {
-            self.parse_number(options.add('%'))
+            self.parse_number(&options.add('%'))
         }
     }
 
-    pub fn parse_number(&mut self, options: Options) -> Result<Ast, Options> {
+    pub fn parse_number(&mut self, options: &Options) -> Result<Ast, Options> {
         const DIGITS: &[char] = &['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.'];
         let digits_name = Options::new("".to_string()).add_str("0-9");
 
         let mut number = vec![self
-            .accept_any(&DIGITS, options.clone(), Some(digits_name.clone()))
+            .accept_any(DIGITS, options.clone(), Some(digits_name.clone()))
             .map_err(|e| {
                 options
                     .clone()
@@ -317,16 +314,12 @@ impl<'a> Parser<'a> {
 
         loop {
             let backup = self.backup();
-
-            let digit = match self.accept_any(&DIGITS, options.clone(), Some(digits_name.clone())) {
-                Ok(i) => i,
-                Err(_) => {
-                    self.restore(backup);
-                    break;
-                }
-            };
-
-            number.push(digit)
+            if let Ok(digit) = self.accept_any(DIGITS, options.clone(), Some(digits_name.clone())) {
+                number.push(digit);
+            } else {
+                self.restore(backup);
+                break;
+            }
         }
 
         let string: String = number.iter().collect();

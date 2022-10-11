@@ -24,7 +24,6 @@ impl fmt::Display for RollResult {
 
 const STAT_ROLL: &str = "4d6l";
 pub fn roll_stats() -> String {
-    let mut res = String::new();
     fn roll_stat() -> Roll {
         let mut rolls = Vec::new();
         Parser::new(STAT_ROLL)
@@ -34,10 +33,11 @@ pub fn roll_stats() -> String {
             .unwrap();
         rolls.remove(0).1
     }
+    let mut res = String::new();
 
     for _ in 0..6 {
         let roll = roll_stat();
-        res.push_str(&format!("{:2}: {:?}\n", roll.total, roll.vals))
+        res.push_str(&format!("{:2}: {:?}\n", roll.total, roll.vals));
     }
     res
 }
@@ -51,7 +51,7 @@ pub fn roll_inline(s: &str, advanced: bool) -> Result<RollResult, String> {
     let copy = ast.clone();
 
     let mut rolls = Vec::new();
-    let total = ast.interp(&mut rolls).unwrap();
+    let total = ast.interp(&mut rolls)?;
 
     let mut map = HashMap::new();
     for (pos, roll) in rolls {

@@ -2,7 +2,7 @@
 name = "roll-wasm"
 version = "0.1.0"
 authors = ["Victor Roest <victor@xirion.net>"]
-edition = "2018"
+edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -10,10 +10,10 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 roll-rs = { path = "../roll" }
 wasm-bindgen = "0.2"
-rand = { version = "0.7", features = ["wasm-bindgen"], default-features = false }
-serde-wasm-bindgen = "0.1"
+getrandom = { version = "0.2", features = ["js"] }
+serde-wasm-bindgen = "0.4"
 serde = { version = "^1.0", features = ["derive"] }
-console_error_panic_hook = "0.1.6"
+console_error_panic_hook = "0.1.7"
 wee_alloc = "0.4"
 
 [dev-dependencies]

@@ -69,7 +69,7 @@ impl fmt::Display for Options {
             writeln!(f)?;
         }
 
-        for i in self.messages.iter() {
+        for i in &self.messages {
             writeln!(f, "{}", i)?;
         }
 
