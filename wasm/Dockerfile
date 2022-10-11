@@ -1,7 +1,7 @@
-FROM rust as builder
+FROM rust:1.64 as builder
 WORKDIR /build
 
-RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+RUN cargo install wasm-pack
 
 COPY . .
 

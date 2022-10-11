@@ -1,7 +1,7 @@
 use std::fmt;
 use std::fmt::{Display, Formatter};
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum FilterModifier<T> {
     KeepLowest(T),
     KeepHighest(T),
@@ -18,16 +18,16 @@ impl<T: Display> Display for FilterModifier<T> {
                 v.fmt(f)?
             }
             Self::KeepHighest(v) => {
-                write!(f, "kl")?;
-                v.fmt(f)?
+                write!(f, "kh")?;
+                v.fmt(f)?;
             }
             Self::DropLowest(v) => {
                 write!(f, "dl")?;
-                v.fmt(f)?
+                v.fmt(f)?;
             }
             Self::DropHighest(v) => {
                 write!(f, "dh")?;
-                v.fmt(f)?
+                v.fmt(f)?;
             }
             Self::None => {}
         }
