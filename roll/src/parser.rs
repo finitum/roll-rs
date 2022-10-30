@@ -14,6 +14,8 @@ pub struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
+
+    #[must_use]
     pub fn new(expr: &'a str) -> Self {
         Self {
             source: expr.to_string(),
@@ -23,6 +25,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    #[must_use]
     pub fn advanced(mut self) -> Self {
         self.advanced = true;
         self
@@ -45,7 +48,7 @@ impl<'a> Parser<'a> {
     }
 
     pub fn accept(&mut self, c: char, options: &Options) -> Result<(), Options> {
-        self.expect(c, &options)?;
+        self.expect(c, options)?;
 
         self.pos += 1;
         self.expr.next();
