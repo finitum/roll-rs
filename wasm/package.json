@@ -1,0 +1,18 @@
+{
+  "name": "roll-wasm",
+  "type": "module",
+  "collaborators": [
+    "Victor Roest <victor@xirion.net>"
+  ],
+  "version": "0.1.0",
+  "files": [
+    "roll_wasm_bg.wasm",
+    "roll_wasm.js",
+    "roll_wasm.d.ts"
+  ],
+  "main": "roll_wasm.js",
+  "types": "roll_wasm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
